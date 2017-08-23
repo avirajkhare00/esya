@@ -73,7 +73,7 @@ func (t *CrowdFundChaincode) Init(stub shim.ChaincodeStubInterface, function str
 	fmt.Printf("jsonString = %q\n", jsonString)
 
 	// Write the state to the ledger
-	err = stub.PutState(voteChainKey, jsonString)
+	err = stub.PutState(voteChainKey, []byte(jsonString))
 	if err != nil {
 		return nil, err
 	}
@@ -106,7 +106,7 @@ func (t *CrowdFundChaincode) Invoke(stub shim.ChaincodeStubInterface, function s
 	fmt.Printf("jsonString = %q\n", jsonString)
 
 	// Write the state back to the ledger
-	err = stub.PutState(voteChainKey, jsonString)
+	err = stub.PutState(voteChainKey, []byte(jsonString))
 	if err != nil {
 		return nil, err
 	}
@@ -138,7 +138,7 @@ func (t *CrowdFundChaincode) Query(stub shim.ChaincodeStubInterface, function st
 	// Get the current value of the state variable
 	jsonValueBytes, err := stub.GetState(voteChainKey)
 	if err != nil {
-		jsonResp := "{\"Error\":\"Failed to get state for " + voteChainkey + "\"}"
+		jsonResp := "{\"Error\":\"Failed to get state for " + voteChainKey + "\"}"
 		return nil, errors.New(jsonResp)
 	}
 	if jsonValueBytes == nil {
