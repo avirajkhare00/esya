@@ -183,7 +183,7 @@ function deployChaincode() {
 	// Construct the deploy request
 	var deployRequest = {
 		// Path (under $GOPATH/src) required for deploy in network mode
-		chaincodePath: "crowd_fund_chaincode",
+		chaincodePath: "vote_chaincode",
 		// Function to trigger
 		fcn: "init",
 		// Arguments to the initializing function
