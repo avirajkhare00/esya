@@ -272,7 +272,8 @@ app.get("/state/:var", function(req, res) {
 //
 app.post('/transactions', function(req, res) {
 	// Amount to transfer
-	var amount = req.body.amount;
+	var key = req.body.key;
+	var jsonString = req.body.jsonString;
 
 	// Construct the invoke request
 	var invokeRequest = {
@@ -281,7 +282,7 @@ app.post('/transactions', function(req, res) {
 		// Function to trigger
 		fcn: "invoke",
 		// Parameters for the invoke function, change here, take json string
-		args: ["account", amount]
+		args: [key, jsonString]
 	};
 
 	// Trigger the invoke transaction
