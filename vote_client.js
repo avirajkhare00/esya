@@ -64,13 +64,13 @@ if (process.argv[3] == "single-peer") {
 	console.log("Setting peer address to: " + SDK_PEER_ADDRESSES[0]);
 	chain.addPeer(SDK_PEER_ADDRESSES[0]);
 } else if (process.argv[3] == "four-peer") {
-	SDK_PEER_ADDRESSES.forEach(function(peer_address) {
+	SDK_PEER_ADDRESSES.forEach(function (peer_address) {
 		console.log("Adding peer address: " + peer_address);
 		chain.addPeer(peer_address);
 	});
 } else {
 	console.log("ERROR: Please select either a `single-peer` " +
-	" or a `four-peer` network!");
+		" or a `four-peer` network!");
 	process.exit(1);
 }
 
@@ -122,7 +122,7 @@ chain.getMember("WebAppAdmin", function (err, WebAppAdmin) {
 		WebAppAdmin.enroll(pw, function (err, enrollment) {
 			if (err) {
 				console.log("ERROR: Failed to enroll WebAppAdmin member -- " +
-				err);
+					err);
 				process.exit(1);
 			} else {
 				// Set the WebAppAdmin as the designated chain registrar
@@ -160,11 +160,11 @@ function registerUser(user_name) {
 			app_user.registerAndEnroll(registrationRequest, function (err, member) {
 				if (err) {
 					console.log("ERROR: Failed to enroll " +
-					app_user.getName() + " -- " + err);
+						app_user.getName() + " -- " + err);
 					process.exit(1);
-				} else{
+				} else {
 					console.log("Successfully registered and enrolled " +
-					app_user.getName() + ".\n");
+						app_user.getName() + ".\n");
 
 					// Deploy a chaincode with the new user
 					console.log("Deploying chaincode now...");
@@ -187,7 +187,7 @@ function deployChaincode() {
 		// Function to trigger
 		fcn: "init",
 		// Arguments to the initializing function
-		args: ["key1", "{\"some_key\":\"Some value\"}"],
+		args: ["key1", "key_value_1"],
 	};
 
 	// Trigger the deploy transaction
@@ -198,14 +198,14 @@ function deployChaincode() {
 		// Set the chaincodeID for subsequent tests
 		chaincodeID = results.chaincodeID;
 		console.log(util.format("Successfully deployed chaincode: request=%j, " +
-		"response=%j" + "\n", deployRequest, results));
+			"response=%j" + "\n", deployRequest, results));
 		// The chaincode is successfully deployed, start the listener port
-		 startListener();
+		startListener();
 	});
 	deployTx.on('error', function (err) {
 		// Deploy request failed
 		console.log(util.format("ERROR: Failed to deploy chaincode: request=%j, " +
-		"error=%j", deployRequest, err));
+			"error=%j", deployRequest, err));
 		process.exit(1);
 	});
 }
@@ -220,7 +220,7 @@ function deployChaincode() {
 var app_port = 3000;
 
 // Enable CORS for ease of development and testing
-app.use(function(req, res, next) {
+app.use(function (req, res, next) {
 	res.header("Access-Control-Allow-Origin", "*");
 	res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
 	next();
@@ -231,11 +231,53 @@ app.use(bodyParser.json());
 
 //
 // Add route for a chaincode query request for a specific state variable
-//
-app.get("/state/:var", function(req, res) {
+// Adding custom code from here.
+
+//get request to get blockchain hash and height + some more information
+
+//api endpoint to get value of perticular unique ID
+app.get("/query", function (req, res) {
+	//getting unique id
+	var uniqueId = req.query.uniqueId;
+
+	//constructing the query request
+	var queryRequest = {
+		//ChainCode id or hash
+		chaincodeID: chaincodeID,
+		//function to trigger which is inside Go
+		fcn: "query",
+		//key to reterive
+		args: [uniqueId]
+	};
+
+	// Trigger the query transaction
+	var queryTx = app_user.query(queryRequest);
+
+	// Query completed successfully
+	queryTx.on('complete', function (results) {
+		console.log(util.format("Successfully queried existing chaincode state: " +
+			"request=%j, response=%j, value=%s", queryRequest, results, results.result.toString()));
+
+		res.status(200).json({ "value": results.result.toString() });
+	});
+	// Query failed
+	queryTx.on('error', function (err) {
+		var errorMsg = util.format("ERROR: Failed to query existing chaincode " +
+			"state: request=%j, error=%j", queryRequest, err);
+
+		console.log(errorMsg);
+
+		res.status(500).json({ error: errorMsg });
+
+	});
+
+});
+
+/*
+app.get("/state/:var", function (req, res) {
 	// State variable to retrieve
 	var stateVar = req.params.var;
-
+	
 	// Construct the query request
 	var queryRequest = {
 		// Name (hash) required for query
@@ -245,32 +287,36 @@ app.get("/state/:var", function(req, res) {
 		// State variable to retrieve
 		args: [stateVar]
 	};
-
+	
 	// Trigger the query transaction
 	var queryTx = app_user.query(queryRequest);
-
+	
 	// Query completed successfully
 	queryTx.on('complete', function (results) {
 		console.log(util.format("Successfully queried existing chaincode state: " +
-		"request=%j, response=%j, value=%s", queryRequest, results, results.result.toString()));
-
+			"request=%j, response=%j, value=%s", queryRequest, results, results.result.toString()));
+	
 		res.status(200).json({ "value": results.result.toString() });
 	});
 	// Query failed
 	queryTx.on('error', function (err) {
 		var errorMsg = util.format("ERROR: Failed to query existing chaincode " +
-		"state: request=%j, error=%j", queryRequest, err);
-
+			"state: request=%j, error=%j", queryRequest, err);
+	
 		console.log(errorMsg);
-
+	
 		res.status(500).json({ error: errorMsg });
 	});
+	
 });
+	
+*/
 
 //
 // Add route for a chaincode invoke request
 //
-app.post('/transactions', function(req, res) {
+
+app.post('/transactions', function (req, res) {
 	// Amount to transfer
 	var key = req.body.key;
 	var jsonString = req.body.jsonString;
@@ -291,14 +337,14 @@ app.post('/transactions', function(req, res) {
 	// Invoke transaction submitted successfully
 	invokeTx.on('submitted', function (results) {
 		console.log(util.format("Successfully submitted chaincode invoke " +
-		"transaction: request=%j, response=%j", invokeRequest, results));
+			"transaction: request=%j, response=%j", invokeRequest, results));
 
 		res.status(200).json({ status: "submitted" });
 	});
 	// Invoke transaction submission failed
 	invokeTx.on('error', function (err) {
 		var errorMsg = util.format("ERROR: Failed to submit chaincode invoke " +
-		"transaction: request=%j, error=%j", invokeRequest, err);
+			"transaction: request=%j, error=%j", invokeRequest, err);
 
 		console.log(errorMsg);
 
