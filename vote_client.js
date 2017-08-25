@@ -235,6 +235,14 @@ app.use(bodyParser.json());
 
 //get request to get blockchain hash and height + some more information
 
+app.get("/height", function(req, res){
+
+	request.get("127.0.0.1:7050/chain")
+		.on('response', function(response){
+			res.status(200).json({"status":"ok", "info":response})
+		})
+});
+
 //api endpoint to get value of perticular unique ID
 app.get("/query", function (req, res) {
 	//getting unique id
