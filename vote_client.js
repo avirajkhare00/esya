@@ -11,6 +11,8 @@ var bodyParser = require('body-parser')
 var debugModule = require('debug');
 var debug = debugModule('crowd_fund');
 
+var request = require('request');
+
 ////////////////////////////////////////////////////////////////////////////////
 // The fist part of this application configures all the required settings the //
 // app will need to connect to the Fabric network, such as the membership     //
