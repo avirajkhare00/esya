@@ -239,7 +239,7 @@ app.use(bodyParser.json());
 
 app.get("/height", function(req, res){
 
-	request.get("127.0.0.1:7050/chain")
+	request.get("http://127.0.0.1:7050/chain")
 		.on('response', function(response){
 			res.status(200).json({"status":"ok", "info":response})
 		})
