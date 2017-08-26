@@ -19,7 +19,7 @@ each of these methods is described below.
 	The method that is triggered when a chaincode receives a query transaction.
 
 The chaincode must also contain the main() method, which starts the chaincode
-when it is first deployed.
+when it is first deployed. This is basically a smart contract.
 */
 
 package main
